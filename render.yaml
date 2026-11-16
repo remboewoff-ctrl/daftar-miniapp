@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: daftar-miniapp
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: SMS_PROVIDER
+        value: demo
+      - key: ESKIZ_FROM
+        value: "4546"
+      - key: REMINDER_CHECK_MINUTES
+        value: "60"
+      - key: BOT_TOKEN
+        sync: false
+      - key: ESKIZ_EMAIL
+        sync: false
+      - key: ESKIZ_PASSWORD
+        sync: false

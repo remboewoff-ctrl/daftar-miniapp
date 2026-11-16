@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Daftar.uz — Qarz Daftari Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-viewport">
+      <div class="miniapp-shell" id="appShell">
+        <!-- Telegram Mini App Top Bar -->
+        <header class="tg-topbar">
+          <div class="tg-topbar-left">
+            <div class="brand-logo" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                <path d="M8 7h8M8 11h6" />
+              </svg>
+            </div>
+            <div>
+              <div class="tg-title-row">
+                <span class="tg-app-name">Daftar.uz</span>
+                <span class="tg-badge">Mini App</span>
+              </div>
+              <div class="tg-subtitle" id="headerStoreSubtitle">Baraka Market • @DaftarUzBot</div>
+            </div>
+          </div>
+          <div class="tg-topbar-actions">
+            <span class="sms-mode-pill" id="smsModePill" title="SMS Gateway holati">Demo SMS</span>
+            <button
+              class="icon-btn"
+              id="themeToggleBtn"
+              type="button"
+              title="Tungi/Kunduzgi rejim"
+              aria-label="Mavzuni almashtirish"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <main class="main-content" id="mainContent">
+          <!-- TAB 1: ASOSIY (DASHBOARD) -->
+          <section class="tab-panel active" id="tab-home">
+            <div class="hero-card">
+              <div class="hero-top">
+                <div>
+                  <div class="hero-label">Jami faol qarzlar</div>
+                  <div class="hero-amount" id="statTotalOutstanding">0 so'm</div>
+                </div>
+                <div class="hero-store-chip" id="heroActiveCustomers">0 ta mijoz</div>
+              </div>
+              <div class="hero-metrics">
+                <div class="hero-metric danger">
+                  <span class="metric-label">Muddati o'tgan</span>
+                  <strong class="metric-value" id="statTotalOverdue">0 so'm</strong>
+                  <span class="metric-sub" id="statOverdueCount">0 ta qarz</span>
+                </div>
+                <div class="hero-metric success">
+                  <span class="metric-label">Undirilgan</span>
+                  <strong class="metric-value" id="statTotalPaid">0 so'm</strong>
+                  <span class="metric-sub" id="statSmsCount">0 ta SMS</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-actions-grid">
+              <button class="action-card primary" id="openNewDebtBtn" type="button">
+                <span class="action-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </span>
+                <span class="action-text">
+                  <strong>Qarzga xarid yozish</strong>
+                  <small>Raqam kiritish + SMS</small>
+                </span>
+              </button>
+              <button class="action-card secondary" id="runRemindersBtn" type="button">
+                <span class="action-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                </span>
+                <span class="action-text">
+                  <strong>Eslatmalarni tekshirish</strong>
+                  <small>Muddati o'tganlarga SMS</small>
+                </span>
+              </button>
+            </div>
+
+            <div class="section-header">
+              <h2>Diqqat talab qiladiganlar</h2>
+              <button class="link-btn" type="button" data-go-tab="debts">Barchasi →</button>
+            </div>
+            <div class="card-list" id="urgentDebtsList"></div>
+
+            <div class="section-header">
+              <h2>So'nggi yuborilgan SMSlar</h2>
+              <button class="link-btn" type="button" data-go-tab="sms">Tarix →</button>
+            </div>
+            <div class="sms-preview-list" id="homeSmsList"></div>
+          </section>
+
+          <!-- TAB 2: QARZLAR RO'YXATI -->
+          <section class="tab-panel" id="tab-debts">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="text"
+                id="debtSearchInput"
+                placeholder="Ism yoki +998 raqam bo'yicha qidirish..."
+              />
+            </div>
+
+            <div class="filter-chips" id="debtFilterChips">
+              <button class="chip active" data-filter="all" type="button">Barchasi</button>
+              <button class="chip" data-filter="overdue" type="button">Muddati o'tgan</button>
+              <button class="chip" data-filter="due_today" type="button">Bugun</button>
+              <button class="chip" data-filter="active" type="button">Faol</button>
+              <button class="chip" data-filter="paid" type="button">To'langan</button>
+            </div>
+
+            <div class="card-list" id="allDebtsList"></div>
+          </section>
+
+          <!-- TAB 3: SMS TARIXI -->
+          <section class="tab-panel" id="tab-sms">
+            <div class="info-banner">
+              <div class="info-banner-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <div>
+                <strong>SMS Xabarnomalar Jurnali</strong>
+                <p>Har bir qarz xaridi, muddat eslatmasi va to'lov cheki bu yerda saqlanadi.</p>
+              </div>
+            </div>
+
+            <div class="sms-toolbar">
+              <button class="btn btn-outline btn-sm" id="testOverdueForceBtn" type="button">
+                Muddati o'tganlarga hozir SMS yuborish (Test)
+              </button>
+            </div>
+
+            <div class="sms-log-list" id="fullSmsLogList"></div>
+          </section>
+
+          <!-- TAB 4: SOZLAMALAR -->
+          <section class="tab-panel" id="tab-settings">
+            <form id="settingsForm" class="settings-stack">
+              <div class="settings-card">
+                <h3>Do'kon ma'lumotlari</h3>
+                <label class="field">
+                  <span>Do'kon nomi</span>
+                  <input type="text" id="setStoreName" required />
+                </label>
+                <label class="field">
+                  <span>Aloqa telefoni (SMS ichida ko'rinadi)</span>
+                  <input type="text" id="setStorePhone" placeholder="+998 90 555 12 34" />
+                </label>
+              </div>
+
+              <div class="settings-card">
+                <h3>Avtomatik SMS va Eslatma qoidalari</h3>
+                <label class="switch-row">
+                  <div>
+                    <strong>Qarz yozilganda darhol SMS</strong>
+                    <small>Xarid summasi va muddati mijozga yuboriladi</small>
+                  </div>
+                  <input type="checkbox" id="setAutoSendOnCreate" />
+                </label>
+
+                <label class="switch-row">
+                  <div>
+                    <strong>Muddat kuni eslatish</strong>
+                    <small>Qaytarish sanasi kelgan kuni ertalab SMS yuborish</small>
+                  </div>
+                  <input type="checkbox" id="setRemindOnDueDate" />
+                </label>
+
+              <div class="settings-card">
+                <h3>Qarz miqdoriga qarab SMS qoidalari</h3>
+                <p class="helper-text">
+                  Mijozning jami qarzi miqdoriga qarab qaysi shablonda va qanchalik tez-tez SMS yuborilishini belgilang.
+                </p>
+                <div class="two-col">
+                  <label class="field">
+                    <span>Minimal SMS chegarasi (so'm)</span>
+                    <input type="number" id="setMinDebtForSms" min="0" step="1000" />
+                  </label>
+                  <label class="field">
+                    <span>Katta qarz chegarasi (so'm)</span>
+                    <input type="number" id="setHighDebtThreshold" min="0" step="10000" />
+                  </label>
+                </div>
+                <div class="two-col">
+                  <label class="field">
+                    <span>Oldindan eslatish (kun)</span>
+                    <select id="setRemindBeforeDays">
+                      <option value="0">O'chirilgan</option>
+                      <option value="1">1 kun oldin</option>
+                      <option value="2">2 kun oldin</option>
+                      <option value="3">3 kun oldin</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Oddiy qarz eslatma</span>
+                    <select id="setNormalRepeatDays">
+                      <option value="1">Har 1 kunda</option>
+                      <option value="2">Har 2 kunda</option>
+                      <option value="3">Har 3 kunda</option>
+                      <option value="7">Har 7 kunda</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="field">
+                  <span>Katta qarz eslatma (muddati o'tsa)</span>
+                  <select id="setHighDebtRepeatDays">
+                    <option value="1">Har kuni (1 kunda)</option>
+                    <option value="2">Har 2 kunda</option>
+                    <option value="3">Har 3 kunda</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="settings-card">
+                <h3>SMS Shablonlari</h3>
+                <p class="helper-text">
+                  O'zgaruvchilar: <code>{ism}</code>, <code>{dokon}</code>, <code>{summa}</code>,
+                  <code>{jami_qarz}</code>, <code>{muddat}</code>, <code>{kechikish}</code>, <code>{telefon}</code>
+                </p>
+                <label class="field">
+                  <span>1. Yangi qarz SMS matni</span>
+                  <textarea id="tplCreated" rows="3"></textarea>
+                </label>
+                <label class="field">
+                  <span>2. Oddiy qarz muddati o'tganda</span>
+                  <textarea id="tplOverdue" rows="3"></textarea>
+                </label>
+                <label class="field">
+                  <span>3. Katta qarz muddati o'tganda</span>
+                  <textarea id="tplHighDebtOverdue" rows="3"></textarea>
+                </label>
+                <label class="field">
+                  <span>4. To'lov qabul qilinganda</span>
+                  <textarea id="tplPaid" rows="2"></textarea>
+                </label>
+              </div>
+
+              <button class="btn btn-primary btn-block" type="submit">Sozlamalarni saqlash</button>
+            </form>
+
+            <div class="settings-card integration-card">
+              <h3>SMS yuborishni sinab ko'rish (Test SMS)</h3>
+              <p class="helper-text">
+                Eskiz.uz yoki Demo rejimda telefonga SMS ketishini hoziroq tekshiring.
+              </p>
+              <div class="phone-input-wrap">
+                <span class="phone-prefix">+998</span>
+                <input type="tel" id="testSmsPhone" placeholder="90 123 45 67" maxlength="12" />
+              </div>
+              <button class="btn btn-outline btn-sm" id="sendTestSmsBtn" type="button">
+                📩 Test SMS yuborish
+              </button>
+            </div>
+
+            <div class="settings-card integration-card">
+              <h3>Telegram Bot & Eskiz.uz ulash</h3>
+              <ol class="setup-steps">
+                <li><code>@BotFather</code> da <code>/setmenubutton</code> orqali Mini App URL ni kiriting.</li>
+                <li>Real SMS yuborish uchun <code>.env</code> faylda <code>SMS_PROVIDER=eskiz</code>, <code>ESKIZ_EMAIL</code> va <code>ESKIZ_PASSWORD</code> ni to'ldiring.</li>
+                <li>Serverdagi avtomatik rejalashtiruvchi har soatda muddati o'tgan qarzlarni tekshirib SMS jo'natadi.</li>
+              </ol>
+            </div>
+          </section>
+        </main>
+
+        <!-- Floating Quick Add Button on Debts Tab -->
+        <button class="fab-btn" id="fabAddDebt" type="button" aria-label="Yangi qarz qo'shish">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav" aria-label="Asosiy navigatsiya">
+          <button class="nav-item active" data-tab="home" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <span>Asosiy</span>
+          </button>
+          <button class="nav-item" data-tab="debts" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span>Qarzlar</span>
+          </button>
+          <button class="nav-item" data-tab="sms" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>SMS tarix</span>
+          </button>
+          <button class="nav-item" data-tab="settings" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>Sozlamalar</span>
+          </button>
+        </nav>
+
+        <!-- MODAL: YANGI QARZ QO'SHISH -->
+        <div class="sheet-backdrop" id="newDebtModal" aria-hidden="true">
+          <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+              <h2>Yangi qarzga xarid</h2>
+              <button class="close-btn" type="button" data-close-modal="newDebtModal">✕</button>
+            </div>
+            <form id="newDebtForm" class="sheet-body">
+              <label class="field">
+                <span>Mijoz telefon raqami</span>
+                <div class="phone-input-wrap">
+                  <span class="phone-prefix">+998</span>
+                  <input
+                    type="tel"
+                    id="newDebtPhone"
+                    placeholder="90 123 45 67"
+                    maxlength="12"
+                    required
+                  />
+                </div>
+                <div class="customer-lookup-hint" id="customerLookupHint"></div>
+              </label>
+
+              <label class="field">
+                <span>Mijoz ismi va familiyasi</span>
+                <input
+                  type="text"
+                  id="newDebtName"
+                  placeholder="Masalan: Jasur Aliyev"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>Xarid summasi (so'm)</span>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  id="newDebtAmount"
+                  placeholder="150 000"
+                  required
+                />
+                <div class="quick-chips" id="amountQuickChips">
+                  <button type="button" data-amount="50000">50 000</button>
+                  <button type="button" data-amount="100000">100 000</button>
+                  <button type="button" data-amount="250000">250 000</button>
+                  <button type="button" data-amount="500000">500 000</button>
+                </div>
+              </label>
+
+              <label class="field">
+                <span>Olingan mahsulotlar / Izoh</span>
+                <input
+                  type="text"
+                  id="newDebtItems"
+                  placeholder="Un 5kg, Yog' 2L, Shakar..."
+                />
+              </label>
+
+              <label class="field">
+                <span>Qarzni qaytarish muddati</span>
+                <input type="date" id="newDebtDueDate" required />
+                <div class="quick-chips" id="dueDateQuickChips">
+                  <button type="button" data-days="3">3 kun</button>
+                  <button type="button" data-days="7">7 kun</button>
+                  <button type="button" data-days="15">15 kun</button>
+                  <button type="button" data-days="30">1 oy</button>
+                </div>
+              </label>
+
+              <label class="switch-row compact">
+                <div>
+                  <strong>Mijoz telefoniga hoziroq SMS yuborish</strong>
+                  <small>Qarz miqdori va muddati haqida xabar</small>
+                </div>
+                <input type="checkbox" id="newDebtSendSms" checked />
+              </label>
+
+              <div class="sms-live-preview" id="newDebtSmsPreviewBox">
+                <div class="sms-preview-label">📱 Mijozga boradigan SMS ko'rinishi:</div>
+                <div class="sms-bubble" id="newDebtSmsPreviewText"></div>
+              </div>
+
+              <button class="btn btn-primary btn-block" type="submit" id="saveDebtSubmitBtn">
+                Saqlash va SMS yuborish
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- MODAL: QARZ TAFSILOTI VA TO'LOV -->
+        <div class="sheet-backdrop" id="debtDetailModal" aria-hidden="true">
+          <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+              <h2 id="detailCustomerName">Mijoz</h2>
+              <button class="close-btn" type="button" data-close-modal="debtDetailModal">✕</button>
+            </div>
+            <div class="sheet-body" id="debtDetailBody"></div>
+          </div>
+        </div>
+
+        <!-- SMS PHONE SIMULATION POPUP -->
+        <div class="sms-phone-toast" id="smsPhoneToast" aria-hidden="true">
+          <div class="sms-phone-header">
+            <span>📩 Mijoz telefoniga SMS keldi</span>
+            <button type="button" id="closeSmsToastBtn">✕</button>
+          </div>
+          <div class="sms-phone-meta" id="smsToastMeta"></div>
+          <div class="sms-phone-body" id="smsToastBody"></div>
+        </div>
+
+        <!-- GENERAL TOAST -->
+        <div class="toast" id="toast"></div>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

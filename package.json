@@ -1,0 +1,13 @@
+{
+  "name": "daftar-miniapp",
+  "version": "1.0.0",
+  "description": "Daftar.uz Telegram Mini App — Do'konlar uchun qarz daftari va avtomatik SMS eslatma tizimi",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "bot": "node bot.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
